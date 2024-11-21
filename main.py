@@ -7,6 +7,8 @@ import scipy.io.wavfile as wv
 from pydub import AudioSegment
 from pathlib import Path
 import argparse
+from moviepy import VideoFileClip, AudioFileClip
+import subprocess
 
 def extract_frames(mp4_path: Path):
     # Open the video file
@@ -51,6 +53,33 @@ def create_video_from_frames(frames, output_video_path, fps, codec):
   video_writer.release()
   print(f"Video created at {output_video_path}")
 
+def combine_video_audio(video_path, audio_path, output_path, fps):
+  # Load the video file
+  video_clip = VideoFileClip(video_path)
+  
+  # Load the audio file
+  audio_clip = AudioFileClip(audio_path)
+  
+  # Set the audio of the video clip to the loaded audio
+  video_clip.with_audio(audio_clip)
+  
+  # Write the final video with sound to the output file
+  video_clip.write_videofile(output_path, codec='vp09', audio_codec='aac')
+
+  print(f"Video with audio saved as {output_path}")
+
+def combine_video_audio_ffmpeg(video_path, audio_path, output_path):
+    command = [
+        "ffmpeg",
+        "-i", video_path,   # Input video file
+        "-i", audio_path,   # Input audio file
+        "-c:v", "copy",     # Copy video codec (no re-encoding)
+        output_path         # Output file path
+    ]
+    
+    subprocess.run(command, check=True)
+    print(f"Video with audio saved as {output_path}")
+
 if __name__ == "__main__":
   # parser = argparse.ArgumentParser()
   # parser.add_argument('--video', required=True, help='path to video')
@@ -69,4 +98,9 @@ if __name__ == "__main__":
   fs, x = wv.read("tmp.wav")
   print(x.shape)
 
-  create_video_from_frames(frames, "res/result.mp4", fps, codec)
+
+  # assembling frame array and wav audio array
+
+  create_video_from_frames(frames, "res/tmp.mp4", fps, codec)
+  # combine_video_audio("res/result.mp4", "tmp.wav", "res/result1.mp4")
+  combine_video_audio_ffmpeg("res/tmp.mp4", "tmp.wav", "res/result.mp4")
