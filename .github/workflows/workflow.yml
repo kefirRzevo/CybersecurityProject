@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Wav LSB
-      run: cd tests/test_wav_lsb && python3 TestWavLSB.py
+      run: cd tests && python3 TestWavLSB.py
     - name: Video Parse
-      run: cd tests/test_video_parse && python3 TestVideoParse.py
+      run: cd tests && python3 TestVideoParse.py

@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
-repo_path = Path(__file__).parent.parent.parent
+repo_path = Path(__file__).parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
 import video_parser
