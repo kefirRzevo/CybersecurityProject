@@ -1,8 +1,6 @@
 name: Steganography post-push
 on:
   push:
-      paths:
-        - src/**
       branches:
         - main
 jobs:
