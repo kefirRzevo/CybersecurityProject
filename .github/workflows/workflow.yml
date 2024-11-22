@@ -13,5 +13,7 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
-    - name: Run tests
+    - name: Wav LSB
       run: cd tests/test_wav_lsb && python3 TestWavLSB.py
+    - name: Video Parse
+      run: cd tests/test_video_parse && python3 TestVideoParse.py
