@@ -1,6 +1,19 @@
 import wave
-from utils.logging_util import setup_logger
-import struct  # For packing and unpacking the message length
+import struct
+import logging
+
+def setup_logger(name):
+    """
+    Sets up a logger with the specified name.
+    """
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+    return logger
 
 logger = setup_logger(__name__)
 
