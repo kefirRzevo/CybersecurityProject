@@ -1,0 +1,17 @@
+name: Steganography post-push
+on:
+  push:
+      paths:
+        - src/**
+      branches:
+        - main
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run tests
+      run: cd tests/test_wav_lsb && python3 TestWavLSB.py
