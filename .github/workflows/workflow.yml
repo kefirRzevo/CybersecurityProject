@@ -11,6 +11,12 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v3
+    - name: Install python deps
+      run: pip install -r requirements.txt
+    - name: Install utils
+      run: sudo apt install ffmpeg
+    - name: Frame LSB
+      run: cd tests && python3 TestFrameLSB.py
     - name: Wav LSB
       run: cd tests && python3 TestWavLSB.py
     - name: Video Parse

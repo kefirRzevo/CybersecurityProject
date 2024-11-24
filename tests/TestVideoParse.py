@@ -6,10 +6,13 @@ from pathlib import Path
 repo_path = Path(__file__).parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
-import video_parser
+from video_parser import ParsedVideo, VideoExtracter, VideoCombiner
 
 class TestVideoParser(unittest.TestCase):
     def setUp(self):
+        tmp_dir = repo_path / "tmp"
+        if not tmp_dir.exists():
+            tmp_dir.mkdir()
         self.input_file = repo_path / "res" / "videoplayback.mp4"
         self.output_file = repo_path / "tmp" / "parsedplayback.mp4"
 
@@ -18,8 +21,8 @@ class TestVideoParser(unittest.TestCase):
             os.remove(self.output_file)
 
     def test(self):
-        parsed = video_parser.VideoExtracter.extract(self.input_file)
-        video_parser.VideoCombiner.combine(self.output_file, parsed)
+        parsed = VideoExtracter.extract(self.input_file)
+        VideoCombiner.combine(self.output_file, parsed)
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,23 +5,23 @@ from pathlib import Path
 from logger import logger
 
 class LSBWavEncode():
-    def encode(input_file_path: Path, output_file_path: Path, secret_message: str):
+    def encode(path_to_input: Path, path_to_output: Path, msg: str):
         """
         Encodes a secret message into an audio file using basic LSB steganography with message length.
 
-        :param input_file_path: Path to the input audio file
-        :param output_file_path: Path to the output encoded audio file
-        :param secret_message: The message to be encoded
+        :param path_to_input: Path to the input audio file
+        :param path_to_output: Path to the output encoded audio file
+        :param msg: The message to be encoded
         """
         try:
             logger.info("Encoding starts...")
-            audio = wave.open(input_file_path.as_posix(), mode="rb")
+            audio = wave.open(path_to_input.as_posix(), mode="rb")
             frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
 
-            logger.info(f"Secret message: {secret_message}")
+            logger.info(f"Secret message: {msg}")
             # Convert the secret message to bits
-            secret_message_bits = "".join([bin(ord(i)).lstrip("0b").rjust(8, "0") for i in secret_message])
-            message_length = len(secret_message_bits)
+            msg_bits = "".join([bin(ord(i)).lstrip("0b").rjust(8, "0") for i in msg])
+            message_length = len(msg_bits)
 
             # Pack the length of the message into 4 bytes (32 bits)
             length_bytes = struct.pack(">I", message_length)  # ">I" is big-endian unsigned int
@@ -30,7 +30,7 @@ class LSBWavEncode():
             length_bits = "".join([bin(byte).lstrip("0b").rjust(8, "0") for byte in length_bytes])
 
             # Combine length bits and message bits
-            full_bits = length_bits + secret_message_bits
+            full_bits = length_bits + msg_bits
 
             # Ensure the message fits into the frame bytes
             if len(full_bits) > len(frame_bytes):
@@ -43,26 +43,26 @@ class LSBWavEncode():
             frame_modified = bytes(frame_bytes)
 
             # Write the modified bytes to the new audio file
-            with wave.open(output_file_path.as_posix(), "wb") as new_audio:
+            with wave.open(path_to_output.as_posix(), "wb") as new_audio:
                 new_audio.setparams(audio.getparams())
                 new_audio.writeframes(frame_modified)
 
             audio.close()
-            logger.info(f"Successfully encoded into {output_file_path}")
+            logger.info(f"Successfully encoded into {path_to_output}")
         except Exception as e:
             logger.error(f"Error during encoding: {e}")
 
 class LSBWavDecode():
-    def decode(input_file_path: Path):
+    def decode(path_to_input: Path):
         """
         Decodes a secret message from an audio file using basic LSB steganography with message length.
 
-        :param input_file_path: Path to the encoded audio file
+        :param path_to_input: Path to the encoded audio file
         :return: The decoded secret message
         """
         try:
             logger.info("Decoding starts...")
-            audio = wave.open(input_file_path.as_posix(), mode="rb")
+            audio = wave.open(path_to_input.as_posix(), mode="rb")
             frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
 
             # Extract the first 32 bits to determine the message length

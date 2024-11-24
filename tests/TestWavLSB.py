@@ -6,10 +6,13 @@ from pathlib import Path
 repo_path = Path(__file__).parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
-import wav_lsb_steganography
+from wav_lsb_steganography import LSBWavDecode, LSBWavEncode
 
 class TestWavLSBSteganography(unittest.TestCase):
     def setUp(self):
+        tmp_dir = repo_path / "tmp"
+        if not tmp_dir.exists():
+            tmp_dir.mkdir()
         self.input_file = repo_path / "res" / "videoplayback.wav"
         self.output_file = repo_path / "tmp" / "parsedplayback.wav"
 
@@ -20,8 +23,8 @@ class TestWavLSBSteganography(unittest.TestCase):
     def test(self):
         msg = "hello world"
 	
-        wav_lsb_steganography.LSBWavEncode.encode(self.input_file, self.output_file, msg)
-        res = wav_lsb_steganography.LSBWavDecode.decode(self.output_file)
+        LSBWavEncode.encode(self.input_file, self.output_file, msg)
+        res = LSBWavDecode.decode(self.output_file)
 
         self.assertEqual(res, msg)
 
