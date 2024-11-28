@@ -33,10 +33,10 @@ if __name__ == "__main__":
     match args.command:
         case "entropy":
             path_to_video = Path(args.video)
-            path_to_out_video = Path(args.output) if args.output is not None else Path(str(args.video)[:-4] + "_output.mp4")
             entropy_period = int(args.period) if args.period is not None else None
             path_to_another = Path(args.diff) if args.diff is not None else None
             video = VideoExtracter.extract(path_to_video)
+            path_to_out_video = Path(args.output) if args.output is not None else Path(str(args.video)[:-4] + ("_entropy.mp4" if entropy_period is not None else "_entropy.png"))
             another = VideoExtracter.extract(path_to_another) if path_to_another is not None else None
             entr_calc = VideoEntropy(video.frames)
             entr_calc.entropy_image(
