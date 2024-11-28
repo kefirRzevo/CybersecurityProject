@@ -3,6 +3,7 @@
 import argparse
 from pathlib import Path
 from video_parser import ParsedVideo, VideoExtracter, VideoCombiner
+from video_entropy import VideoEntropy
 
 repo_path = Path(__file__).parent.parent
 
@@ -19,7 +20,11 @@ if __name__ == "__main__":
     entropy.add_argument("--video", required=True, help="path to video")
     entropy.add_argument("--period", type=int, default=None, help="entropy \"period\". If not specified, feature desabled")
     entropy.add_argument("--output", help="path to result file with entropy representation")
-    entropy.add_argument("--diff", help="path to another video. Instead of show entropy of `--video` param, show differnce between `path to video` and `path to another video` videos")
+    entropy.add_argument(
+        "--diff", 
+        help="path to another video. Instead of show entropy of `--video`" 
+        "param, show differnce between `path to video` and `path to another video` videos"
+    )
 
     decode = subparsers.add_parser("decode")
     
@@ -27,13 +32,24 @@ if __name__ == "__main__":
     print(args)
     match args.command:
         case "entropy":
-            print("entropy")
-            pass
+            path_to_video = Path(args.video)
+            path_to_out_video = Path(args.output) if args.output is not None else Path(str(args.video)[:-4] + "_output.mp4")
+            entropy_period = int(args.period) if args.period is not None else None
+            path_to_another = Path(args.diff) if args.diff is not None else None
+            video = VideoExtracter.extract(path_to_video)
+            another = VideoExtracter.extract(path_to_another) if path_to_another is not None else None
+            entr_calc = VideoEntropy(video.frames)
+            entr_calc.entropy_image(
+                another.frames if another is not None else None,
+                path_to_out_video,
+                entropy_period  
+            )
+
         case "encode":
-            print("encode")
+            
             pass
         case "decode":
-            print("decode")
+            
             pass
         case _ :
             print("ERROR")
