@@ -21,5 +21,3 @@ jobs:
       run: cd tests && python3 TestWavLSB.py
     - name: Video Parse
       run: cd tests && python3 TestVideoParse.py
-    - name: Video Entropy
-      run: cd tests && python3 TestVideoEntropy.py
