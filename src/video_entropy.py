@@ -7,10 +7,11 @@ import matplotlib.pyplot as plt
 class VideoEntropy:
   # frame_array: np.ndarray[np.ndarray[tuple[np.int8, np.int8, np.int8], tuple[int, int] ], int]
 
-  def __init__(self, frames: list[np.ndarray]) -> None:
+  def __init__(self, frames: list[np.ndarray], fps: int) -> None:
     self.frame_array = frames
+    self.fps = fps
   
-  def rect_entropy(frame: np.ndarray, x_A: int, y_A: int, x_B: int, y_B: int) -> float:
+  def rect_entropy(frame: np.ndarray) -> float:
     """
     for given frame = `frames[frame_index]` calculate entropy of rectangle erased from frame.
     
@@ -51,20 +52,41 @@ class VideoEntropy:
     x_len = len(frame[0])
     y_len = len(frame)
 
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).ravel()
+    frame_flat = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).ravel()
 
     if p == None or p >= x_len or p >= y_len:
-      return VideoEntropy.rect_entropy(frame, 0, 0, x_len, y_len)
+      return VideoEntropy.rect_entropy(frame_flat)
 
     if p < 1:
       raise ValueError(f"The period must be a value greater then 0, but period={p}")
 
-    res = np.zeros(y_len, x_len)
-    for x in range(p, x_len - p):
-      for y in range(p, y_len - p):
-        res[y][x] = VideoEntropy.rect_entropy(frame, x - p, x + p + 1, y - p, y + p + 1)
+    res = np.zeros(shape=(y_len, x_len))
+    for x in range(p, x_len - p - 1):
+      for y in range(p, y_len - p - 1):
+        frame_flat = cv2.cvtColor(frame[y-p:y+p+1, x-p:x+p+1], cv2.COLOR_BGR2GRAY).ravel()
+        res[y][x] = VideoEntropy.rect_entropy(frame_flat)
     
     return res
+  
+  def _featured_entropy_image(self, another: list[np.ndarray] | None, out: Path, period: int, fps: int) -> None:
+    entropy_frames = []
+    for i in range(len(self.frame_array)):
+      entropy_tmp = VideoEntropy.frame_entropy(self.frame_array[i], period)
+      if another is not None:
+        another_frame_entropy = VideoEntropy.frame_entropy(another[i], period)
+        entropy_tmp = np.abs(entropy_tmp - another_frame_entropy)
+      
+      print(i)
+      img = plt.imshow(entropy_tmp, cmap="plasma", interpolation=None)
+      frame = img.get_array()
+      entropy_frames.append(frame)
+      
+    
+    out_video = ParsedVideo
+    out_video.fps = self.fps
+    out_video.frames = entropy_frames
+
+    VideoCombiner.combine(out_video, out)
   
   def entropy_image(self, another: list[np.ndarray] | None, out: Path, period: int | None = None) -> None:
     """
@@ -73,8 +95,12 @@ class VideoEntropy:
     entropy for both frame arrays and plot only theres difference
     """
 
+    if another is not None and len(another) != len(self.frame_array):
+      raise ValueError(f"number of frames in video passed with `--diff` [{len(another)}] must much "
+                       f"number of frames in video passed with `--video` [{len(self.frame_array)}]")
+
     if period is not None:
-      self._featured_entropy_image(another, out, period)
+      self._featured_entropy_image(another, out, period, self.fps)
       return
     
     entropy_y = [

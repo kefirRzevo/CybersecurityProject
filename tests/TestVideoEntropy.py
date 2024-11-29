@@ -26,15 +26,18 @@ class TestVideoEntropy(unittest.TestCase):
 
     out_path = repo_path / "res" / "videoplayback_entropy.png"
 
-    entropy_video = VideoEntropy(video.frames)
+    entropy_video = VideoEntropy(video.frames, video.fps)
     entropy_video.entropy_image(another=None, out=out_path)
 
-class TestVideoEntropyFeatured(unittest.TestCase):
-  def setUp(self):
-    pass
-
+class TestImageEntropyFeatured(unittest.TestCase):
   def test(self):
-    pass
+    img_path = repo_path / "res" / "puppy.png"
+    out_img_path = repo_path / "res" / "puppy_entropy.png"
+    img = cv2.imread(img_path)
+
+    entropy = VideoEntropy.frame_entropy(img, p=3)
+    plt.imshow(entropy, cmap="plasma", interpolation=None)
+    plt.savefig(fname=out_img_path)
 
 if __name__ == '__main__':
   unittest.main()
