@@ -21,8 +21,9 @@ class TestWavLSBSteganography(unittest.TestCase):
             os.remove(self.output_file)
 
     def test(self):
-        msg = "hello world"
-	
+        with open(repo_path / "res" / "faust.txt") as f:
+            msg = f.read()
+
         LSBWavEncode.encode(self.input_file, self.output_file, msg)
         res = LSBWavDecode.decode(self.output_file)
 
