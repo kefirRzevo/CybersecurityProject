@@ -58,7 +58,7 @@ class LSBWavEncode():
             logger.error(f"Error during encoding: {e}")
 
 class LSBWavDecode():
-    def decode(path_to_input: Path):
+    def decode(path_to_input: Path) -> str:
         """
         Decodes a secret message from an audio file using basic LSB steganography with message length.
 
