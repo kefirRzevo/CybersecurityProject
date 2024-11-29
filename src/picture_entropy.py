@@ -118,3 +118,24 @@ class PictureEntropy:
     plt.ylabel("Entropy")
     plt.xlabel("Frame index")
     plt.savefig(fname=out)
+
+  def png_entropy_image(img_path: str, another_path: str | None, out_path: str, period: int | None) -> None:
+    img = cv2.imread(img_path.as_posix())
+    frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+    entropy = PictureEntropy.frame_entropy(frame, period)
+
+    if another_path is not None:
+      another_img = cv2.imread(another_path.as_posix())
+      another_frame = cv2.cvtColor(another_img, cv2.COLOR_BGRA2BGR)
+      
+      entropy = np.abs(np.subtract(entropy - PictureEntropy.frame_entropy(another_frame, period)))
+
+    if type(entropy) == float:
+      print(entropy)
+      return
+    
+    plt.imshow(entropy, cmap="plasma", interpolation=None)
+    plt.savefig(fname=out_path)
+    
+      
