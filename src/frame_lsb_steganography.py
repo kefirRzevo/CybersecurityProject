@@ -4,7 +4,7 @@ import numpy as np
 
 from logger import logger
 
-class LSBFrame:
+class _LSBFrame:
     def _index_to_i_j(pixels: np.ndarray, index: int) -> tuple[int, int]:
         cols = len(pixels[0])
         i = index // cols
@@ -14,9 +14,9 @@ class LSBFrame:
     def _round_to_multiple_of_six(msg_len: int) -> int:
         return (msg_len + 5) // 6 * 6
 
-class LSBFrameEncode(LSBFrame):
+class LSBFrameEncode(_LSBFrame):
     def _set_data_in_pixel(pixels: np.ndarray, index: int, bin_bits: str):
-        i, j = LSBFrame._index_to_i_j(pixels, index)
+        i, j = _LSBFrame._index_to_i_j(pixels, index)
         pixels[i][j][0] &= 0b11111100  # Clear last 2 bits of channel 0
         pixels[i][j][1] &= 0b11111100  # Clear last 2 bits of channel 1
         pixels[i][j][2] &= 0b11111100  # Clear last 2 bits of channel 2
@@ -24,7 +24,14 @@ class LSBFrameEncode(LSBFrame):
         pixels[i][j][1] |= int(bin_bits[2:4], 2)  # Set bits 2-3
         pixels[i][j][2] |= int(bin_bits[4:6], 2)  # Set bits 4-5
 
+    def encode_max_len(frame: np.ndarray) -> int:
+        return len(frame) * len(frame[0]) * 2 / 8
+
     def encode(frame: np.ndarray, msg: str) -> np.ndarray:
+        max_len = LSBFrameEncode.encode_max_len(frame)
+        logger.info(f"Max length to encode in the frame '{max_len}'")
+        if len(msg) > max_len:
+            raise Exception("too large message")
         logger.info(f"Started encoding message '{msg}'")
         msg_len_bin = bin(len(msg))[2:].zfill(24)
         index = 0
@@ -37,7 +44,7 @@ class LSBFrameEncode(LSBFrame):
         bits_len = len(bits)
         
         # Pad the message binary string to be a multiple of 6
-        dummy_count = LSBFrame._round_to_multiple_of_six(bits_len) - bits_len
+        dummy_count = _LSBFrame._round_to_multiple_of_six(bits_len) - bits_len
         bits_res = "0" * dummy_count + bits
         bits_res_len = len(bits_res)
 
@@ -49,9 +56,9 @@ class LSBFrameEncode(LSBFrame):
         logger.info(f"Ended encoding message '{msg}'")
         return frame
 
-class LSBFrameDecode(LSBFrame):
+class LSBFrameDecode(_LSBFrame):
     def _get_data_from_pixel(pixels: np.ndarray, index: int) -> str:
-        i, j = LSBFrame._index_to_i_j(pixels, index)
+        i, j = _LSBFrame._index_to_i_j(pixels, index)
         temp = ""
         first_local = bin(pixels[i][j][0] & 3)[2:]
         first_local = (2 - len(first_local)) * "0" + first_local
@@ -73,7 +80,7 @@ class LSBFrameDecode(LSBFrame):
             index += 1
 
         bits_len = int(msg_len_bin, 2) * 8
-        bits_res_len = LSBFrame._round_to_multiple_of_six(bits_len)
+        bits_res_len = _LSBFrame._round_to_multiple_of_six(bits_len)
 
         bits_res = ""
         for _ in range(bits_res_len // 6):

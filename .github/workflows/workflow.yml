@@ -16,8 +16,8 @@ jobs:
     - name: Install utils
       run: sudo apt install ffmpeg
     - name: Frame LSB
-      run: cd tests && python3 TestFrameLSB.py
+      run: cd src/tests && python3 TestFrameLSB.py
     - name: Wav LSB
-      run: cd tests && python3 TestWavLSB.py
+      run: cd src/tests && python3 TestWavLSB.py
     - name: Video Parse
-      run: cd tests && python3 TestVideoParse.py
+      run: cd src/tests && python3 TestVideoParse.py

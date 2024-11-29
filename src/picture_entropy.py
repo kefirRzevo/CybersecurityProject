@@ -4,7 +4,7 @@ from pathlib import Path
 from video_parser import *
 import matplotlib.pyplot as plt
 
-class VideoEntropy:
+class PictureEntropy:
   # frame_array: np.ndarray[np.ndarray[tuple[np.int8, np.int8, np.int8], tuple[int, int] ], int]
 
   def __init__(self, frames: list[np.ndarray], fps: int) -> None:
@@ -14,7 +14,7 @@ class VideoEntropy:
   def rect_entropy(frame: np.ndarray) -> float:
     """
     for given frame = `frames[frame_index]` calculate entropy of rectangle erased from frame.
-    
+
    A________________________
     |        |             |
     |        |             |
@@ -23,7 +23,7 @@ class VideoEntropy:
     |        B             |
     |                      |
     |                      |
-    |______________________| 
+    |______________________|
 
     So only the entropy of rectangle, stricted with vertexes A and B, is calculated.
     x_A, x_B, y_A, y_B must be valid pixel cooradinates.
@@ -55,7 +55,7 @@ class VideoEntropy:
     frame_flat = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).ravel()
 
     if p == None or p >= x_len or p >= y_len:
-      return VideoEntropy.rect_entropy(frame_flat)
+      return PictureEntropy.rect_entropy(frame_flat)
 
     if p < 1:
       raise ValueError(f"The period must be a value greater then 0, but period={p}")
@@ -64,16 +64,16 @@ class VideoEntropy:
     for x in range(p, x_len - p - 1):
       for y in range(p, y_len - p - 1):
         frame_flat = cv2.cvtColor(frame[y-p:y+p+1, x-p:x+p+1], cv2.COLOR_BGR2GRAY).ravel()
-        res[y][x] = VideoEntropy.rect_entropy(frame_flat)
+        res[y][x] = PictureEntropy.rect_entropy(frame_flat)
     
     return res
   
   def _featured_entropy_image(self, another: list[np.ndarray] | None, out: Path, period: int, fps: int) -> None:
     entropy_frames = []
     for i in range(len(self.frame_array)):
-      entropy_tmp = VideoEntropy.frame_entropy(self.frame_array[i], period)
+      entropy_tmp = PictureEntropy.frame_entropy(self.frame_array[i], period)
       if another is not None:
-        another_frame_entropy = VideoEntropy.frame_entropy(another[i], period)
+        another_frame_entropy = PictureEntropy.frame_entropy(another[i], period)
         entropy_tmp = np.abs(entropy_tmp - another_frame_entropy)
       
       print(i)
@@ -104,8 +104,8 @@ class VideoEntropy:
       return
     
     entropy_y = [
-      VideoEntropy.frame_entropy(self.frame_array[i]) - (
-        VideoEntropy.frame_entropy(another[i]) 
+      PictureEntropy.frame_entropy(self.frame_array[i]) - (
+        PictureEntropy.frame_entropy(another[i]) 
         if another is not None and len(another) == len(self.frame_array) else 0
       ) 
       for i in range(0, len(self.frame_array))

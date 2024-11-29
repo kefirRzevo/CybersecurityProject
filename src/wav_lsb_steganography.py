@@ -5,6 +5,11 @@ from pathlib import Path
 from logger import logger
 
 class LSBWavEncode():
+    def encode_max_len(path_to_input: Path):
+        audio = wave.open(path_to_input.as_posix(), mode="rb")
+        frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
+        return len(frame_bytes) // 8
+
     def encode(path_to_input: Path, path_to_output: Path, msg: str):
         """
         Encodes a secret message into an audio file using basic LSB steganography with message length.
@@ -14,6 +19,10 @@ class LSBWavEncode():
         :param msg: The message to be encoded
         """
         try:
+            max_len = LSBWavEncode.encode_max_len(path_to_input)
+            logger.info(f"Max length to encode in the wav '{max_len}'")
+            if len(msg) > max_len:
+                raise Exception("too large message")
             logger.info("Encoding starts...")
             audio = wave.open(path_to_input.as_posix(), mode="rb")
             frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
@@ -31,10 +40,6 @@ class LSBWavEncode():
 
             # Combine length bits and message bits
             full_bits = length_bits + msg_bits
-
-            # Ensure the message fits into the frame bytes
-            if len(full_bits) > len(frame_bytes):
-                raise ValueError("The secret message is too large to fit in the audio file.")
 
             # Encode the full bits into the frame bytes
             for i, bit in enumerate(full_bits):
@@ -86,4 +91,3 @@ class LSBWavDecode():
 
         except Exception as e:
             logger.error(f"Error during decoding: {e}")
-            return None

@@ -3,10 +3,10 @@ import sys
 import unittest
 from pathlib import Path
 
-repo_path = Path(__file__).parent.parent
+repo_path = Path(__file__).parent.parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
-from video_parser import ParsedVideo, VideoExtracter, VideoCombiner
+from video_parser import VideoExtracter, VideoCombiner
 
 class TestVideoParser(unittest.TestCase):
     def setUp(self):

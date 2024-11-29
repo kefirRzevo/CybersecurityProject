@@ -4,7 +4,7 @@ import unittest
 import cv2
 from pathlib import Path
 
-repo_path = Path(__file__).parent.parent
+repo_path = Path(__file__).parent.parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
 from frame_lsb_steganography import LSBFrameEncode, LSBFrameDecode

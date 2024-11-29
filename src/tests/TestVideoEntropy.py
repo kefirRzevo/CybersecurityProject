@@ -5,10 +5,10 @@ import cv2
 
 from pathlib import Path
 
-repo_path = Path(__file__).parent.parent
+repo_path = Path(__file__).parent.parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
-from video_entropy import *
+from picture_entropy import *
 
 class TestImgEntropy(unittest.TestCase):
   def test(self):
@@ -26,18 +26,15 @@ class TestVideoEntropy(unittest.TestCase):
 
     out_path = repo_path / "res" / "videoplayback_entropy.png"
 
-    entropy_video = VideoEntropy(video.frames, video.fps)
+    entropy_video = VideoEntropy(video.frames)
     entropy_video.entropy_image(another=None, out=out_path)
 
-class TestImageEntropyFeatured(unittest.TestCase):
-  def test(self):
-    img_path = repo_path / "res" / "puppy.png"
-    out_img_path = repo_path / "res" / "puppy_entropy.png"
-    img = cv2.imread(img_path)
+class TestVideoEntropyFeatured(unittest.TestCase):
+  def setUp(self):
+    pass
 
-    entropy = VideoEntropy.frame_entropy(img, p=3)
-    plt.imshow(entropy, cmap="plasma", interpolation=None)
-    plt.savefig(fname=out_img_path)
+  def test(self):
+    pass
 
 if __name__ == '__main__':
   unittest.main()

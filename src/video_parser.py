@@ -5,7 +5,7 @@ import numpy as np
 import scipy.io.wavfile as wv
 from pydub import AudioSegment
 from pathlib import Path
-from moviepy import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip
 from logger import logger
 
 repo_path = Path(__file__).parent.parent

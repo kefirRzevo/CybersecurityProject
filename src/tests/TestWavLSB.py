@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 
-repo_path = Path(__file__).parent.parent
+repo_path = Path(__file__).parent.parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
 from wav_lsb_steganography import LSBWavDecode, LSBWavEncode
@@ -21,9 +21,8 @@ class TestWavLSBSteganography(unittest.TestCase):
             os.remove(self.output_file)
 
     def test(self):
-        with open(repo_path / "res" / "faust.txt") as f:
-            msg = f.read()
-
+        msg = "hello world"
+	
         LSBWavEncode.encode(self.input_file, self.output_file, msg)
         res = LSBWavDecode.decode(self.output_file)
 
