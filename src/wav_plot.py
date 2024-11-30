@@ -1,28 +1,45 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile
-from pathlib import Path
 
-repo_path = Path(__file__).parent.parent
-
-def decode_wav(audio_file):
+def decode_wav(audio_file : Path):
     fs, x=scipy.io.wavfile.read(audio_file)
-    k=np.arange(x[:, ...].size)
-    return x[:, ...], k/fs
+    k=np.arange(x[:80000, ...].size)
+    return x[:80000, ...], k/fs
 
-def plot_wav(audio_file):
+def generate_entropy_png(audio_file: Path, output: Path):
     plt.figure(figsize=[8, 4])
-
-    xs, ts = decode_wav(repo_path / 'tmp' / 'parsedplayback.wav')
-    plt.plot(ts, xs)
-
-    xs, ts = decode_wav(audio_file)
+    
+    xs, ts = decode_wav(output)
     plt.plot(ts, xs)
 
     plt.grid()
     plt.xlabel("$t$, c")
-    plt.ylabel("$x[k]$")
+    plt.ylabel("$Amplitude$")
     plt.tight_layout()
-    plt.show()
+    plt.savefic(output)
 
-plot_wav(repo_path / 'res' / 'videoplayback.wav')
+def generate_entropy_diff_png(lhs: Path, rhs: Path, output: Path):
+    plt.figure(figsize=[8, 4])
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+
+    l_xs, l_ts = decode_wav(lhs)
+    ax1.plot(l_ts, l_xs, label='First WAV file')
+    
+    r_xs, r_ts = decode_wav(rhs)
+    ax1.plot(r_ts, r_xs, label='Second WAV file')
+    
+    ax1.grid()
+    ax1.xlabel("$t$, c")
+    ax1.ylabel("$Amplitude$")
+    ax1.tight_layout()
+    ax1.legend()
+
+    ax2.scatter(ts, xs-xs1, label='Difference')
+    
+    ax2grid()
+    ax2.xlabel("$t$, c")
+    ax2.ylabel("$Amplitude$")
+    ax2.tight_layout()
+    ax2.legend()
+    
+    plt.savefic(output)

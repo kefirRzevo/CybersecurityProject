@@ -7,6 +7,7 @@ from video_parser import ParsedVideo, VideoExtracter, VideoCombiner
 from frame_lsb_steganography import LSBFrameEncode, LSBFrameDecode
 from wav_lsb_steganography import LSBWavEncode, LSBWavDecode
 from picture_entropy import PictureEntropy
+import wav_plot
 
 repo_path = Path(__file__).parent.parent
 
@@ -24,9 +25,17 @@ def generate_entropy_video(video_path: str, output: str, diff: str | None):
 
     video_entr.entropy_image(another, Path(output), None)
 
-def generate_wav_plot(audio: str, output: str, diff: str):
+def generate_wav_plot(audio: str, output: str, diff: str | None):
     path_to_audio = Path(audio)
     path_to_output = Path(output)
+
+    if diff is None:
+        generate_entropy_png(path_to_audio, path_to_output)
+        return
+
+    path_to_diff = Path(diff)
+
+    generate_entropy_diff_png(path_to_audio, path_to_diff, path_to_output)
 
 def generate_encoded_video(video: str, secret: str, output: str):
     path_to_video = Path(video)
@@ -89,7 +98,7 @@ if __name__ == "__main__":
     plot = subparsers.add_parser("wav_plot")
     plot.add_argument("--audio", required=True, help="path to audio wav")
     plot.add_argument("--output", required=True, help="path to audio plot")
-    plot.add_argument("--diff", default="", type=str, help="path to encoded audio to see diff")
+    plot.add_argument("--diff", default=None, type=str, help="path to encoded audio to see diff")
 
     args = parser.parse_args()
     print(args)
@@ -102,7 +111,8 @@ if __name__ == "__main__":
             else:
                 parser.error("for command `entorpy` --video or --picture must be specified")
             
-        case "plot_wav":
+        case "wav_plot":
+            generate_wav_plot(args.audio, args.output, args.diff)
             pass
         case "encode":
             generate_encoded_video(args.video, args.secret, args.output)
