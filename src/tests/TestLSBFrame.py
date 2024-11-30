@@ -7,7 +7,7 @@ from pathlib import Path
 repo_path = Path(__file__).parent.parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
-from frame_lsb_steganography import LSBFrameEncode, LSBFrameDecode
+from lsb_frame_steganography import LSBFrameEncode, LSBFrameDecode
 
 class TestFrameLSBSteganography(unittest.TestCase):
     def setUp(self):

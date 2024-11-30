@@ -16,10 +16,6 @@ class TestVideoParser(unittest.TestCase):
         self.input_file = repo_path / "res" / "videoplayback.mp4"
         self.output_file = repo_path / "tmp" / "parsedplayback.mp4"
 
-    def tearDown(self):
-        if self.output_file.exists():
-            os.remove(self.output_file)
-
     def test(self):
         parsed = VideoExtracter.extract(self.input_file)
         VideoCombiner.combine(self.output_file, parsed)

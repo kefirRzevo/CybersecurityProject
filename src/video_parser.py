@@ -5,13 +5,12 @@ import numpy as np
 import scipy.io.wavfile as wv
 from pydub import AudioSegment
 from pathlib import Path
-from moviepy import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip
 from logger import logger
 
 repo_path = Path(__file__).parent.parent
 
 class ParsedVideo:
-    path_to_mp4: Path
     fps: int
     frames: list[np.ndarray]
     path_to_wav: Path
@@ -37,11 +36,10 @@ class VideoExtracter:
     def _get_path_to_wav(path_to_mp4: Path) -> Path:
         path_to_wav = repo_path / "tmp"
         path_to_wav.touch()
-        return path_to_wav / f"{path_to_mp4.stem}.wav"
+        return path_to_wav / f"{path_to_mp4.stem}_audio.wav"
 
     def extract(path_to_mp4: Path) -> ParsedVideo:
         parsed = ParsedVideo()
-        parsed.path_to_mp4 = path_to_mp4
         video = cv2.VideoCapture(path_to_mp4)
         if not video.isOpened():
             raise RuntimeError(f"Unable to open video file: {path_to_mp4}")
@@ -60,7 +58,7 @@ class VideoCombiner:
     def _get_path_to_raw_mp4(path_to_final_mp4: Path) -> Path:
         path_to_raw_mp4 = repo_path / "tmp"
         path_to_raw_mp4.touch()
-        return path_to_raw_mp4 / f"{path_to_final_mp4.stem}_raw.mp4"
+        return path_to_raw_mp4 / f"{path_to_final_mp4.stem}_frames.mp4"
 
     def _combine_to_raw_mp4(path_to_raw_mp4: Path, video: ParsedVideo):
         height, width, _ = video.frames[0].shape

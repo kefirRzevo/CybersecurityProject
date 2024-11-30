@@ -25,7 +25,7 @@ class LSBFrameEncode(_LSBFrame):
         pixels[i][j][2] |= int(bin_bits[4:6], 2)  # Set bits 4-5
 
     def encode_max_len(frame: np.ndarray) -> int:
-        return len(frame) * len(frame[0]) * 2 / 8
+        return len(frame) * len(frame[0]) * 2 // 8
 
     def encode(frame: np.ndarray, msg: str) -> np.ndarray:
         max_len = LSBFrameEncode.encode_max_len(frame)
@@ -78,8 +78,9 @@ class LSBFrameDecode(_LSBFrame):
         for _ in range(4):  # Read 4 pixels for 24 bits
             msg_len_bin += LSBFrameDecode._get_data_from_pixel(pixels, index)
             index += 1
-
-        bits_len = int(msg_len_bin, 2) * 8
+        msg_len = int(msg_len_bin, 2)
+        logger.info(f"Length of decoded message '{msg_len}'")
+        bits_len = msg_len * 8
         bits_res_len = _LSBFrame._round_to_multiple_of_six(bits_len)
 
         bits_res = ""

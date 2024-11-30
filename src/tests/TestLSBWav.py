@@ -6,7 +6,7 @@ from pathlib import Path
 repo_path = Path(__file__).parent.parent.parent
 sys.path.append((repo_path / "src").as_posix())
 
-from wav_lsb_steganography import LSBWavDecode, LSBWavEncode
+from lsb_wav_steganography import LSBWavDecode, LSBWavEncode
 
 class TestWavLSBSteganography(unittest.TestCase):
     def setUp(self):

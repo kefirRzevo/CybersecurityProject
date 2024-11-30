@@ -15,9 +15,11 @@ jobs:
       run: pip install -r requirements.txt
     - name: Install utils
       run: sudo apt install ffmpeg
-    - name: Frame LSB
-      run: cd src/tests && python3 TestFrameLSB.py
-    - name: Wav LSB
-      run: cd src/tests && python3 TestWavLSB.py
+    - name: LSB Frame
+      run: cd src/tests && python3 TestLSBFrame.py
+    - name: LSB Png
+      run: cd src/tests && python3 TestLSBPng.py
+    - name: LSB Wav
+      run: cd src/tests && python3 TestLSBWav.py
     - name: Video Parse
       run: cd src/tests && python3 TestVideoParse.py

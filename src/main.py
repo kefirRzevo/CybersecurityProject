@@ -4,10 +4,10 @@ import argparse
 import numpy as np
 from pathlib import Path
 from video_parser import ParsedVideo, VideoExtracter, VideoCombiner
-from frame_lsb_steganography import LSBFrameEncode, LSBFrameDecode
-from wav_lsb_steganography import LSBWavEncode, LSBWavDecode
-from picture_entropy import PictureEntropy
-import wav_plot
+from lsb_frame_steganography import LSBFrameEncode, LSBFrameDecode
+from lsb_wav_steganography import LSBWavEncode, LSBWavDecode
+from plot_picture import PictureEntropy
+import plot_wav
 
 repo_path = Path(__file__).parent.parent
 
@@ -30,12 +30,12 @@ def generate_wav_plot(audio: str, output: str, diff: str | None):
     path_to_output = Path(output)
 
     if diff is None:
-        generate_entropy_png(path_to_audio, path_to_output)
+        plot_wav.generate_entropy_png(path_to_audio, path_to_output)
         return
 
     path_to_diff = Path(diff)
 
-    generate_entropy_diff_png(path_to_audio, path_to_diff, path_to_output)
+    plot_wav.generate_entropy_diff_png(path_to_audio, path_to_diff, path_to_output)
 
 def generate_encoded_video(video: str, secret: str, output: str):
     path_to_video = Path(video)
@@ -73,6 +73,29 @@ def generate_encoded_video(video: str, secret: str, output: str):
     LSBWavEncode.encode(copy.path_to_wav, encoded_wav, msg)
     VideoCombiner.combine(path_to_output, parsed_video)
 
+def generate_decoded_video(video: str, secret: str):
+    path_to_video = Path(video)
+    path_to_secret = Path(secret)
+
+    parsed_video: ParsedVideo = VideoExtracter.extract(path_to_video)
+    chunks_count = len(parsed_video.frames)
+    
+    is_end = False
+    chunks = ["" for _ in range(chunks_count)]
+    for i in range(chunks_count):
+        if is_end:
+            break
+        chunks[i] = LSBFrameDecode.decode(parsed_video.frames[i])
+        if chunks[i] == "":
+            is_end = True
+
+    frame_msg = "".join(chunks)
+    print(parsed_video.path_to_wav.as_posix())
+    audio_msg = LSBWavDecode.decode(parsed_video.path_to_wav)
+    audio_msg = LSBWavDecode.decode(Path("./tmp/encoded_audio.wav"))
+    print(audio_msg)
+    with open(path_to_secret, "w") as f:
+        f.write(audio_msg)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
