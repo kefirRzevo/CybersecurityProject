@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import numpy as np
 
 from logger import logger
@@ -32,6 +30,7 @@ class LSBFrameEncode(_LSBFrame):
         logger.info(f"Max length to encode in the frame '{max_len}'")
         if len(msg) > max_len:
             raise Exception("too large message")
+
         logger.info(f"Started encoding message '{msg}'")
         msg_len_bin = bin(len(msg))[2:].zfill(24)
         index = 0

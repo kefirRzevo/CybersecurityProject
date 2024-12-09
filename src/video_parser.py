@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import cv2
 import numpy as np
 import scipy.io.wavfile as wv

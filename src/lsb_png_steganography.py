@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import cv2
 from lsb_frame_steganography import LSBFrameEncode, LSBFrameDecode
 
@@ -14,7 +12,7 @@ class LSBPngEncode():
 
     def encode(path_to_input: Path, path_to_output: Path, msg: str):
         max_len = LSBPngEncode.encode_max_len(path_to_input)
-        logger.info(f"Max length to encode in the frame '{max_len}'")
+        logger.info(f"Max length to encode in the png '{max_len}'")
         if len(msg) > max_len:
             raise Exception("too large message")
         logger.info(f"Started encoding message '{msg}'")

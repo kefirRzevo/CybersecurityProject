@@ -1,6 +1,7 @@
 import wave
-import struct
 from pathlib import Path
+
+from lsb_bytes_steganography import LSBBytesEncode, LSBBytesDecode
 
 from logger import logger
 
@@ -8,7 +9,7 @@ class LSBWavEncode():
     def encode_max_len(path_to_input: Path):
         audio = wave.open(path_to_input.as_posix(), mode="rb")
         frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
-        return len(frame_bytes) // 8
+        return LSBBytesEncode.encode_max_len(frame_bytes)
 
     def encode(path_to_input: Path, path_to_output: Path, msg: str):
         """
@@ -22,28 +23,11 @@ class LSBWavEncode():
         logger.info(f"Max length to encode in the wav '{max_len}'")
         if len(msg) > max_len:
             raise Exception("too large message")
+
         logger.info("Encoding starts...")
         audio = wave.open(path_to_input.as_posix(), mode="rb")
         frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
-
-        logger.info(f"Secret message: {msg}")
-        # Convert the secret message to bits
-        msg_bits = "".join([bin(ord(i)).lstrip("0b").rjust(8, "0") for i in msg])
-        message_length = len(msg_bits)
-
-        # Pack the length of the message into 4 bytes (32 bits)
-        length_bytes = struct.pack(">I", message_length)  # ">I" is big-endian unsigned int
-
-        # Convert the length bytes to bits
-        length_bits = "".join([bin(byte).lstrip("0b").rjust(8, "0") for byte in length_bytes])
-
-        # Combine length bits and message bits
-        full_bits = length_bits + msg_bits
-
-        # Encode the full bits into the frame bytes
-        for i, bit in enumerate(full_bits):
-            frame_bytes[i] = (frame_bytes[i] & 254) | int(bit)
-
+        frame_bytes = LSBBytesEncode.encode(frame_bytes, msg)
         frame_modified = bytes(frame_bytes)
 
         # Write the modified bytes to the new audio file
@@ -65,22 +49,4 @@ class LSBWavDecode():
         logger.info("Decoding starts...")
         audio = wave.open(path_to_input.as_posix(), mode="rb")
         frame_bytes = bytearray(list(audio.readframes(audio.getnframes())))
-
-        # Extract the first 32 bits to determine the message length
-        length_bits = "".join([str((frame_bytes[i] & 1)) for i in range(32)])
-        message_length = struct.unpack(">I", int(length_bits, 2).to_bytes(4, byteorder="big"))[0]
-
-        logger.info(f"Extracted message length: {message_length} bytes")
-
-        # Now extract the message bits using the extracted length
-        if message_length > len(frame_bytes) * 8:
-            raise ValueError("The extracted message length is larger than the available audio data.")
-
-        message_bits = "".join([str((frame_bytes[i + 32] & 1)) for i in range(message_length)])
-
-        # Convert bits back to characters
-        decoded_message = "".join(chr(int(message_bits[i:i + 8], 2)) for i in range(0, len(message_bits), 8))
-
-        logger.info(f"Successfully decoded: {decoded_message}")
-        audio.close()
-        return decoded_message
+        return LSBBytesDecode.decode(frame_bytes)
