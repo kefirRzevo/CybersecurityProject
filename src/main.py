@@ -2,7 +2,7 @@
 
 import argparse
 from pathlib import Path
-from parse_mov import ParsedVideo, VideoExtracter, VideoCombiner
+from parse_mov import ParsedVideo, VideoExtracter, VideoCombiner, remove_tmp_dir, counter
 from lsb_png_steganography import LSBPngEncode, LSBPngDecode
 from lsb_wav_steganography import LSBWavEncode, LSBWavDecode
 import plot_picture
@@ -31,7 +31,7 @@ def generate_video_plot(video: str, output: str, diff: str | None):
         return
 
     path_to_diff = Path(diff)
-    plot_picture.plot_picture_diff(path_to_video, path_to_diff, path_to_output)
+    plot_picture.plot_video_diff(path_to_video, path_to_diff, path_to_output)
 
 def generate_picture_plot(picture: str, output: str, diff: str | None):
     path_to_picture = Path(picture)
@@ -147,3 +147,5 @@ if __name__ == "__main__":
             pass
         case _ :
             print("ERROR")
+    
+    remove_tmp_dir()

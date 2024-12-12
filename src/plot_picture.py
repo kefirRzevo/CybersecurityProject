@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def _rect_entropy(frame: np.ndarray) -> float:
 	"""
-	for given frame = `frames[frame_index]` calculate entropy of rectangle erased from frame.
+	for given frame calculate entropy of rectangle erased from frame.
 
    A________________________
 	|        |             |
@@ -51,18 +51,37 @@ def _frame_entropy(frame: np.ndarray) -> float:
 			res[y][x] = _rect_entropy(frame_flat)
 	return res
 
-def plot_video(path_to_video: Path, path_to_output: Path):
+def _video_entropy(path_to_video: Path) -> np.ndarray:
 	parsed: ParsedVideo = VideoExtracter.extract(path_to_video)
-	frames: list[np.ndarray] = []
+	print("OK Extracting")
+	frames_etropy = []
 	for i in range(parsed.frames_count):
 		path_to_frame = parsed.path_to_frame(i)
 		img = cv2.imread(path_to_frame.as_posix())
 		frame = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-		frames.append(frame)
-	pass
+		frames_etropy.append(_rect_entropy(frame))
+
+	return frames_etropy
+
+def plot_video(path_to_video: Path, path_to_output: Path):
+	entropy_y = _video_entropy(path_to_video)
+	entropy_x = np.arange(len(entropy_y))
+
+	plt.figure(111, figsize=[12, 8])
+	plt.plot(entropy_x, entropy_y, "b.", label="Total Entropy of every video frame")
+	plt.ylabel("Entropy")
+	plt.xlabel("Frame index")
+	plt.savefig(fname=path_to_output)
 
 def plot_video_diff(path_to_lhs: Path, path_to_rhs: Path, path_to_output: Path):
-	pass
+	entropy_y = _video_entropy(path_to_lhs) - _video_entropy(path_to_rhs)
+	entropy_x = np.arange(len(entropy_y))
+
+	plt.figure(111, figsize=[12, 8])
+	plt.plot(entropy_x, entropy_y, "b.", label="Total Entropy of every video frame")
+	plt.ylabel("Entropy")
+	plt.xlabel("Frame index")
+	plt.savefig(fname=path_to_output)
 
 # def _featured_entropy_image(self, another: list[np.ndarray] | None, out: Path, period: int, fps: int) -> None:
 # 	entropy_frames = []
