@@ -1,7 +1,6 @@
 import ffmpeg
 import cv2
 from pathlib import Path
-from os import remove
 from logger import logger
 
 repo_path = Path(__file__).parent.parent
@@ -11,14 +10,9 @@ def create_tmp_dir() -> Path:
     global counter
     path = repo_path / f"tmp{counter}"
     if not path.exists():
-        counter += 1
-    path.mkdir()
+        path.mkdir()
+    counter += 1
     return path
-
-def remove_tmp_dir() -> None:
-    path = repo_path / f"tmp{counter}"
-    if path.exists():
-        remove(path.as_posix())
 
 class ParsedVideo:
     def __init__(self):

@@ -3,12 +3,15 @@ import matplotlib.pyplot as plt
 import scipy.io.wavfile
 from pathlib import Path
 
+from logger import logger
+
 def _decode_wav(path_to_audio : Path):
     fs, x = scipy.io.wavfile.read(path_to_audio)
     k = np.arange(x[:, ...].size)
     return x[:, ...], k/fs
 
 def plot_audio(path_to_audio: Path, path_to_output: Path):
+    logger.info(f"Started plot audio {path_to_audio}")
     plt.figure(figsize=[8, 4])
     
     xs, ts = _decode_wav(path_to_audio)
@@ -26,12 +29,15 @@ def plot_audio_diff(lhs: Path, rhs: Path, path_to_output: Path):
 
     plt.subplot(1, 2, 1)
 
+    logger.info(f"Started plot lhs audio {lhs}")
     l_xs, l_ts = _decode_wav(lhs)
     plt.plot(l_ts, l_xs, label='First WAV file')
     
+    logger.info(f"Started plot rhs audio {rhs}")
     r_xs, r_ts = _decode_wav(rhs)
     plt.plot(r_ts, r_xs, label='Second WAV file')
     
+    logger.info(f"Getting res audio")
     plt.grid()
     plt.title('WAV Signals')
     plt.xlabel("$t$, c")

@@ -2,7 +2,7 @@
 
 import argparse
 from pathlib import Path
-from parse_mov import ParsedVideo, VideoExtracter, VideoCombiner, remove_tmp_dir, counter
+from parse_mov import ParsedVideo, VideoExtracter, VideoCombiner
 from lsb_png_steganography import LSBPngEncode, LSBPngDecode
 from lsb_wav_steganography import LSBWavEncode, LSBWavDecode
 import plot_picture
@@ -16,7 +16,7 @@ def _split_to_chunks(msg: str, chunks_count: int, frame_max_len: int) -> list[st
         begin = i * frame_max_len
         end = (i + 1) * frame_max_len
         if end >= len(msg):
-            end = len(msg) - 1
+            end = len(msg)
             chunks[i] = msg[begin:end]
             break
         chunks[i] = msg[begin:end]
@@ -147,5 +147,3 @@ if __name__ == "__main__":
             pass
         case _ :
             print("ERROR")
-    
-    remove_tmp_dir()
