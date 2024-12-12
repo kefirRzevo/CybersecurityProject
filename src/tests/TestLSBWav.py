@@ -13,7 +13,7 @@ class TestWavLSBSteganography(unittest.TestCase):
         tmp_dir = repo_path / "tmp"
         if not tmp_dir.exists():
             tmp_dir.mkdir()
-        self.input_file = repo_path / "res" / "audio.wav"
+        self.input_file = repo_path / "data" / "audio.wav"
         self.output_file = repo_path / "tmp" / "audio_encoded.wav"
         if self.output_file.exists():
             os.remove(self.output_file)

@@ -1,6 +1,5 @@
 import ffmpeg
 import cv2
-import numpy as np
 from pathlib import Path
 from logger import logger
 
@@ -49,9 +48,6 @@ class VideoExtracter:
         output = ffmpeg.output(input, path_to_frames.as_posix())
         ffmpeg.run(output, capture_stdout=True, capture_stderr=True)
         parsed.frames_count = len(list(parsed.path_to_dir.glob('*.png')))
-        # for i in range(frames_count):
-        #     img = cv2.imread(parsed.path_to_frame(i).as_posix())
-        #     parsed.frames.append(cv2.cvtColor(img, cv2.COLOR_BGRA2BGR))
         logger.info(f"Extracted {parsed.frames_count} frames")
         path_to_audio = parsed.path_to_audio()
         output = ffmpeg.output(input, path_to_audio.as_posix())

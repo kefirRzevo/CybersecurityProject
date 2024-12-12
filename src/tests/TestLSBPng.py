@@ -13,7 +13,7 @@ class TestPngLSBSteganography(unittest.TestCase):
         tmp_dir = repo_path / "tmp"
         if not tmp_dir.exists():
             tmp_dir.mkdir()
-        self.input_file = repo_path / "res" / "puppy.png"
+        self.input_file = repo_path / "data" / "puppy.png"
         self.output_file = repo_path / "tmp" / "puppy_encoded.png"
         if self.output_file.exists():
             os.remove(self.output_file)

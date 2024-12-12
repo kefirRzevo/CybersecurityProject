@@ -1,6 +1,5 @@
 import struct
 import numpy as np
-from pathlib import Path
 
 from logger import logger
 

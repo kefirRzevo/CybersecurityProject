@@ -1,61 +1,59 @@
 #!/usr/bin/python3
 
 import argparse
-import numpy as np
 from pathlib import Path
 from parse_mov import ParsedVideo, VideoExtracter, VideoCombiner
 from lsb_png_steganography import LSBPngEncode, LSBPngDecode
 from lsb_wav_steganography import LSBWavEncode, LSBWavDecode
-from plot_picture import PictureEntropy
+import plot_picture
 import plot_audio
 
 repo_path = Path(__file__).parent.parent
 
 def _split_to_chunks(msg: str, chunks_count: int, frame_max_len: int) -> list[str]:
     chunks = ["" for _ in range(chunks_count)]
-    for i in range(0, chunks_count * frame_max_len, frame_max_len):
-        begin = i
-        end = i + frame_max_len
+    for i in range(chunks_count):
+        begin = i * frame_max_len
+        end = (i + 1) * frame_max_len
         if end >= len(msg):
-            end = len(msg)
+            end = len(msg) - 1
             chunks[i] = msg[begin:end]
             break
         chunks[i] = msg[begin:end]
     return chunks
 
-def generate_entropy_png(picture: str, output: str, diff: str | None, period: int | None):
-    PictureEntropy.png_entropy_image(picture, diff, output, period)
+def generate_video_plot(video: str, output: str, diff: str | None):
+    path_to_video = Path(video)
+    path_to_output = Path(output)
 
-def generate_entropy_video(video_path: str, output: str, diff: str | None):
-    video = VideoExtracter.extract(Path(video_path))
-    video_entr = PictureEntropy(video.frames, video.fps)
+    if diff is None:
+        plot_picture.plot_video(path_to_video, path_to_output)
+        return
 
-    another = None 
-    if diff is not None:
-        another_video = VideoExtracter.extract(Path(diff))
-        another = another_video.frames
+    path_to_diff = Path(diff)
+    plot_picture.plot_picture_diff(path_to_video, path_to_diff, path_to_output)
 
-    video_entr.entropy_image(another, Path(output), None)
+def generate_picture_plot(picture: str, output: str, diff: str | None):
+    path_to_picture = Path(picture)
+    path_to_output = Path(output)
 
-def generate_entropy(picture: str, video: str, output: str, diff: str, period: int):
-    if args.picture is not None:
-        generate_entropy_png(picture, output, diff, period)
-    elif args.video is not None:
-        generate_entropy_video(video, output, diff)
-    else:
-        raise Exception("for command `entropy` --video or --picture must be specified")
+    if diff is None:
+        plot_picture.plot_picture(path_to_picture, path_to_output)
+        return
 
-def generate_wav_plot(audio: str, output: str, diff: str | None):
+    path_to_diff = Path(diff)
+    plot_picture.plot_picture_diff(path_to_picture, path_to_diff, path_to_output)
+
+def generate_audio_plot(audio: str, output: str, diff: str | None):
     path_to_audio = Path(audio)
     path_to_output = Path(output)
 
     if diff is None:
-        plot_audio.generate_entropy_png(path_to_audio, path_to_output)
+        plot_audio.plot_audio(path_to_audio, path_to_output)
         return
 
     path_to_diff = Path(diff)
-
-    plot_audio.generate_entropy_diff_png(path_to_audio, path_to_diff, path_to_output)
+    plot_audio.plot_audio_diff(path_to_audio, path_to_diff, path_to_output)
 
 def generate_encoded_video(video: str, secret: str, output: str):
     path_to_video = Path(video)
@@ -89,8 +87,7 @@ def generate_decoded_video(video: str, secret: str):
 
     parsed: ParsedVideo = VideoExtracter.extract(path_to_video)
     chunks_count = parsed.frames_count
-    
-    is_end = False
+
     chunks = ["" for _ in range(chunks_count)]
     for i in range(chunks_count):
         chunks[i] = LSBPngDecode.decode(parsed.path_to_frame(i))
@@ -115,26 +112,32 @@ if __name__ == "__main__":
     decode.add_argument("--video", type=str, required=True, help="path to video")
     decode.add_argument("--secret", type=str, required=True, help="path to secret file")
 
-    entropy = subparsers.add_parser("entropy")
+    entropy = subparsers.add_parser("plot_picture")
     entropy.add_argument("--picture", type=str, help="path to picture png")
-    entropy.add_argument("--video", type=str, help="path to video mp4")
     entropy.add_argument("--output", required=True, type=str, help="path to picture entropy plot")
-    entropy.add_argument("--diff", default=None, type=str, help="path to encoded picture or video to see difference")
-    entropy.add_argument("--period", default=None, type=int)
+    entropy.add_argument("--diff", default=None, type=str, help="path to encoded picture to see the difference")
 
-    plot = subparsers.add_parser("wav_plot")
+    entropy = subparsers.add_parser("plot_video")
+    entropy.add_argument("--video", type=str, help="path to video mov")
+    entropy.add_argument("--output", required=True, type=str, help="path to video entropy plot")
+    entropy.add_argument("--diff", default=None, type=str, help="path to encoded video to see the difference")
+
+    plot = subparsers.add_parser("plot_audio")
     plot.add_argument("--audio", required=True, help="path to audio wav")
     plot.add_argument("--output", required=True, help="path to audio plot")
-    plot.add_argument("--diff", default=None, type=str, help="path to encoded audio to see diff")
+    plot.add_argument("--diff", default=None, type=str, help="path to encoded audio to see the difference")
 
     args = parser.parse_args()
     print(args)
     match args.command:
-        case "entropy":
-            generate_entropy(args.picture, args.video, args.output, args.diff, args.period)
+        case "plot_video":
+            generate_video_plot(args.video, args.output, args.diff)
             pass
-        case "wav_plot":
-            generate_wav_plot(args.audio, args.output, args.diff)
+        case "plot_picture":
+            generate_picture_plot(args.picture, args.output, args.diff)
+            pass
+        case "plot_audio":
+            generate_audio_plot(args.audio, args.output, args.diff)
             pass
         case "encode":
             generate_encoded_video(args.video, args.secret, args.output)

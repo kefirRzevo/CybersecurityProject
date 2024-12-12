@@ -8,7 +8,7 @@ def _decode_wav(path_to_audio : Path):
     k = np.arange(x[:, ...].size)
     return x[:, ...], k/fs
 
-def generate_entropy_png(path_to_audio: Path, path_to_output: Path):
+def plot_audio(path_to_audio: Path, path_to_output: Path):
     plt.figure(figsize=[8, 4])
     
     xs, ts = _decode_wav(path_to_audio)
@@ -21,7 +21,7 @@ def generate_entropy_png(path_to_audio: Path, path_to_output: Path):
     plt.tight_layout()
     plt.savefig(path_to_output)
 
-def generate_entropy_diff_png(lhs: Path, rhs: Path, path_to_output: Path):
+def plot_audio_diff(lhs: Path, rhs: Path, path_to_output: Path):
     plt.figure(figsize=[8, 4])
 
     plt.subplot(1, 2, 1)
