@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 from pathlib import Path
-from video_parser import *
+from parse_mov import *
 import matplotlib.pyplot as plt
 
 class PictureEntropy:
@@ -137,5 +137,3 @@ class PictureEntropy:
   
     plt.imshow(entropy, cmap="plasma", interpolation=None)
     plt.savefig(fname=out_path)
-
-      

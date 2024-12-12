@@ -3,13 +3,25 @@
 import argparse
 import numpy as np
 from pathlib import Path
-from video_parser import ParsedVideo, VideoExtracter, VideoCombiner
-from lsb_frame_steganography import LSBFrameEncode, LSBFrameDecode
+from parse_mov import ParsedVideo, VideoExtracter, VideoCombiner
+from lsb_png_steganography import LSBPngEncode, LSBPngDecode
 from lsb_wav_steganography import LSBWavEncode, LSBWavDecode
 from plot_picture import PictureEntropy
-import plot_wav
+import plot_audio
 
 repo_path = Path(__file__).parent.parent
+
+def _split_to_chunks(msg: str, chunks_count: int, frame_max_len: int) -> list[str]:
+    chunks = ["" for _ in range(chunks_count)]
+    for i in range(0, chunks_count * frame_max_len, frame_max_len):
+        begin = i
+        end = i + frame_max_len
+        if end >= len(msg):
+            end = len(msg)
+            chunks[i] = msg[begin:end]
+            break
+        chunks[i] = msg[begin:end]
+    return chunks
 
 def generate_entropy_png(picture: str, output: str, diff: str | None, period: int | None):
     PictureEntropy.png_entropy_image(picture, diff, output, period)
@@ -38,12 +50,12 @@ def generate_wav_plot(audio: str, output: str, diff: str | None):
     path_to_output = Path(output)
 
     if diff is None:
-        plot_wav.generate_entropy_png(path_to_audio, path_to_output)
+        plot_audio.generate_entropy_png(path_to_audio, path_to_output)
         return
 
     path_to_diff = Path(diff)
 
-    plot_wav.generate_entropy_diff_png(path_to_audio, path_to_diff, path_to_output)
+    plot_audio.generate_entropy_diff_png(path_to_audio, path_to_diff, path_to_output)
 
 def generate_encoded_video(video: str, secret: str, output: str):
     path_to_video = Path(video)
@@ -51,54 +63,42 @@ def generate_encoded_video(video: str, secret: str, output: str):
     path_to_output = Path(output)
     with open(path_to_secret) as f:
         msg = f.read()
-    parsed_video: ParsedVideo = VideoExtracter.extract(path_to_video)
-    chunks_count = len(parsed_video.frames)
-    frame_max_len = LSBFrameEncode.encode_max_len(parsed_video.frames[0])
-    frames_max_len = frame_max_len * len(parsed_video.frames)
-    audio_max_len = LSBWavEncode.encode_max_len(parsed_video.path_to_wav)
+    parsed: ParsedVideo = VideoExtracter.extract(path_to_video)
+    chunks_count = parsed.frames_count
+    frame_max_len = LSBPngEncode.encode_max_len(parsed.path_to_frame(0))
+    frames_max_len = frame_max_len * chunks_count
+    audio_max_len = LSBWavEncode.encode_max_len(parsed.path_to_audio())
     max_len = min(frames_max_len, audio_max_len)
     if len(msg) > max_len:
         raise Exception("too large secret message")
-    
-    is_end = False
-    chunks = ["" for i in range(0, chunks_count * frame_max_len, frame_max_len)]
-    for i in range(chunks_count):
-        begin = i
-        end = i + frame_max_len
-        if len(msg) >= end:
-            end = len(msg)
-            is_end = True
-        if is_end:
-            break
-        chunks[i] = msg[begin:end]
 
+    encoded = ParsedVideo()
+    encoded.fps = parsed.fps
+    encoded.frames_count = parsed.frames_count
+
+    chunks = _split_to_chunks(msg, chunks_count, frame_max_len)
     for i in range(chunks_count):
-        if chunks[i] != "":
-            parsed_video.frames[i] = LSBFrameEncode.encode(parsed_video.frames[i], chunks[i])
-    encoded_wav = repo_path / "tmp" / "encoded_audio.wav"
-    LSBWavEncode.encode(parsed_video.path_to_wav, encoded_wav, msg)
-    parsed_video.path_to_wav = encoded_wav
-    VideoCombiner.combine(path_to_output, parsed_video)
+        LSBPngEncode.encode(parsed.path_to_frame(i), encoded.path_to_frame(i), chunks[i])
+
+    LSBWavEncode.encode(parsed.path_to_audio(), encoded.path_to_audio(), msg)
+    VideoCombiner.combine(path_to_output, encoded)
 
 def generate_decoded_video(video: str, secret: str):
     path_to_video = Path(video)
     path_to_secret = Path(secret)
 
-    parsed_video: ParsedVideo = VideoExtracter.extract(path_to_video)
-    chunks_count = len(parsed_video.frames)
+    parsed: ParsedVideo = VideoExtracter.extract(path_to_video)
+    chunks_count = parsed.frames_count
     
     is_end = False
     chunks = ["" for _ in range(chunks_count)]
     for i in range(chunks_count):
-        if is_end:
-            break
-        chunks[i] = LSBFrameDecode.decode(parsed_video.frames[i])
-        if chunks[i] == "":
-            is_end = True
+        chunks[i] = LSBPngDecode.decode(parsed.path_to_frame(i))
 
     frame_msg = "".join(chunks)
-    audio_msg = LSBWavDecode.decode(parsed_video.path_to_wav)
+    audio_msg = LSBWavDecode.decode(parsed.path_to_audio())
     print(audio_msg)
+    print(frame_msg)
     with open(path_to_secret, "w") as f:
         f.write(audio_msg)
 
