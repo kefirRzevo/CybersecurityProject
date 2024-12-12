@@ -1,15 +1,34 @@
-## ТЗ ##
-### Написать приложени(е/я) на C++, которое будет уметь: ###
-- В данный mp4 файл кодировать пользовательский текст для пользователя, заданного логином и паролем
-- Из данного mp4 файла достовать пользовательский текст по логину и паролю  
-- Шифровать пользовательский текст
-- Дешировать пользовательский текст
+## CyberSecurity Project ##
 
-## TODO ##
+### This is a python application ###
+- It can encode a secret message in video (currently supported format is `.mov`)
+- Then you can share this video with anyone
+- After that one can decode that secret message to get a secret information
+- The secret information is stored both in frames and in audio. (It is
+duplicated to make verifying trivial).
+- Currently only LSB (last significan bit) algorithm is implemented both in
+frames and in audio
+- There is a possibility to generate audio visualization and entropy plots to see the way secret info is encoded.
 
-Главные вопросы это выбор криптографиечского и стеганографического алгоритмов. 
-По хорошему выбрать 2-3 критографических, сравнить их в теории, обосновать выбор какого то одного.
-Точно так же со стеганографией, нужно поресерчить какие алгоритмы для выбрать 
-для звуковой дорожки, какие для видео дорожки.
+### How to use it? ###
+- To clone this project, run this:
+```
+        git clone https://github.com/kefirRzevo/CybersecurityProject.git
+        cd CybersecurityProject
+```
+- To install all python deps:
+```
+    pip install -r requirements.txt
+```
+- To see all enabled modes:
+```
+    ./src/main.py --help
+```
+After that select mode (encode,decode,plot_picture,plot_video,plot_audio) and run `src/main.py` with necessary options.
 
-Начать нужно со стеганографии, под нее выберем тот или иной шифро-алгоритм.
+### This is an example of frame steganography
+![Picture](./data/puppy.png)
+![Picture](./res/puppy_entropy.png)
+
+### This is an example of audio steganography
+![Picture](./res/wav_compare.png)
