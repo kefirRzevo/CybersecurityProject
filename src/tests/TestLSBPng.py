@@ -19,7 +19,8 @@ class TestPngLSBSteganography(unittest.TestCase):
             os.remove(self.output_file)
 
     def test(self):
-        msg = "hell"
+        with open(repo_path / "data" / "puppy_msg.txt") as f:
+            msg = f.read()
         LSBPngEncode.encode(self.input_file, self.output_file, msg)
         res = LSBPngDecode.decode(self.output_file)
         self.assertEqual(res, msg)

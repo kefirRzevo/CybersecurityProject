@@ -23,7 +23,7 @@ class LSBFrameEncode(_LSBFrame):
         pixels[i][j][2] |= int(bin_bits[4:6], 2)  # Set bits 4-5
 
     def encode_max_len(frame: np.ndarray) -> int:
-        return len(frame) * len(frame[0]) * 2 // 8
+        return len(frame) * len(frame[0]) * 6 // 8 - 3
 
     def encode(frame: np.ndarray, msg: str) -> np.ndarray:
         max_len = LSBFrameEncode.encode_max_len(frame)
